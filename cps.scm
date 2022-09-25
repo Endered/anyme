@@ -70,7 +70,7 @@
 (define-cps-conversion (lambda args . exprs) cont
   (let ((next (next-temporary-variable)))
     `(,cont (lambda ,(cons next args)
-	      ,@(convert-local-scope exprs next)))))
+	      ,(convert-local-scope exprs next)))))
 
 (define-cps-conversion (set! var expr) cont
   (convert-cps
@@ -191,10 +191,8 @@
 					       (('define var) ())
 					       (x (list x)))
 				 exprs)))
-    `((lambda ,global-vars ,(convert-cps cont (fold-exprs define-removed)))
-      ,@(map (lambda (x) ()) global-vars))
-    (append (map (lambda (x) `(define ,x)) global-vars)
-	    (map (lambda (x) (convert-cps x 'identity)) define-removed))))
+    `((lambda ,global-vars ,(convert-cps (fold-exprs define-removed) cont))
+      ,@(map (lambda (x) ()) global-vars))))
 
 (define (convert-cps expr env)
   (get-just (find-map-just
