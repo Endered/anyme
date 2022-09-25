@@ -139,6 +139,11 @@
       (just (transpile 'lisp-nil))
       (none)))
 
+(define (transpile-boolean expr)
+  (if (boolean? expr)
+      (just (if expr "true" "false"))
+      (none)))
+
 (define (transpile-var expr)
   (if (var? expr)
       (just (convert-symbol expr))
@@ -173,6 +178,7 @@
 	       (f expr))
 	     (list
 	      transpile-nil
+	      transpile-boolean
 	      transpile-var
 	      transpile-number
 	      transpile-string

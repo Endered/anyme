@@ -115,6 +115,11 @@
       (just `(,cont ()))
       (none)))
 
+(define (convert-cps-boolean expr cont)
+  (if (boolean? expr)
+      (just `(,cont ,expr))
+      (none)))
+
 (define (convert-cps-var expr cont)
   (if (var? expr)
       (just `(,cont ,expr))
@@ -203,6 +208,7 @@
 	       (f expr env))
 	     (list
 	      convert-cps-nil
+	      convert-cps-boolean
 	      convert-cps-var
 	      convert-cps-number
 	      convert-cps-string
