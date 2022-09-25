@@ -204,4 +204,7 @@
 	(cons res (read-while-eof)))))
 
 
-(map display (map simplify (read-while-eof)))
+(map (lambda (line)
+       (write line)
+       (newline))
+     (map simplify (read-while-eof)))

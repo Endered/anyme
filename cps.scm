@@ -67,10 +67,10 @@
 		     (xs (none))))
 	    *cps-conversions*)))))
 
-(define-cps-conversion (lambda args expr) cont
+(define-cps-conversion (lambda args . exprs) cont
   (let ((next (next-temporary-variable)))
     `(,cont (lambda ,(cons next args)
-	      ,(convert-cps expr next)))))
+	      ,@(convert-local-scope exprs next)))))
 
 (define-cps-conversion (set! var expr) cont
   (convert-cps
@@ -80,6 +80,29 @@
 
 (define-cps-conversion (define var) cont
   `(define var))
+
+(define-cps-conversion (if condition then else) cont
+  (let ((next (next-temporary-variable))
+	(evaled (next-temporary-variable)))
+    `((lambda (,next)
+	,(convert-cps
+	  condition
+	  `(lambda (,evaled)
+	     (if ,evaled
+		 ,(convert-cps then next)
+		 ,(convert-cps else next)))))
+      ,cont)))
+
+(define-cps-conversion (call/cc f) cont
+  (let ((evaled (next-temporary-variable))
+	(next (next-temporary-variable))
+	(val (next-temporary-variable)))
+    (convert-cps
+     f
+     `(lambda (,evaled)
+	(,evaled ,cont
+		 (lambda (,next ,val)
+		   (,cont ,val)))))))
 
 (define (var? expr)
   (symbol? expr))
@@ -152,6 +175,27 @@
     (append (map (lambda (x) `(define ,x)) global-vars)
 	    (map (lambda (x) (convert-cps x 'identity)) define-removed))))
 
+(define (fold-exprs exprs)
+  (match exprs
+	 ((x) x)
+	 ((x . other)
+	  (let ((tmp (next-temporary-variable)))
+	    `((lambda (,tmp) ,(fold-exprs other)) ,x)))))
+
+(define (convert-local-scope exprs cont)
+  (let ((global-vars (mappend (match-lambda (('define var expr) (list var))
+					    (('define var) (list var))
+					    (_ ()))
+			      exprs))
+	(define-removed (mappend (match-lambda (('define var expr) (list `(set! ,var ,expr)))
+					       (('define var) ())
+					       (x (list x)))
+				 exprs)))
+    `((lambda ,global-vars ,(convert-cps cont (fold-exprs define-removed)))
+      ,@(map (lambda (x) ()) global-vars))
+    (append (map (lambda (x) `(define ,x)) global-vars)
+	    (map (lambda (x) (convert-cps x 'identity)) define-removed))))
+
 (define (convert-cps expr env)
   (get-just (find-map-just
 	     (lambda (f)
@@ -170,23 +214,20 @@
 	()
 	(cons res (read-while-eof)))))
 
-
-(define (=+ cont . args)
-  (cont (apply + args)))
-
-(define (=* cont . args)
-  (cont (apply * args)))
-
-
 (define (cps-function f)
   (lambda (cont . args)
     (cont (apply f args))))
 
 (define =print (cps-function print))
-
+(define =+ (cps-function +))
+(define =* (cps-function *))
+(define =- (cps-function -))
+(define =<= (cps-function <=))
+(define == (cps-function =))
 
 (map (lambda (line)
-       (display line)
+       (write line)
        (newline))
      (convert-global-scope
       (read-while-eof)))
+
