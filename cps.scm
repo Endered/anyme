@@ -51,7 +51,7 @@
 (define next-temporary-variable
   (let ((num 0))
     (lambda ()
-      (let ((res (string->symbol (format #f "~a_~a" *transpiler-temporal-variable* num))))
+      (let ((res (string->symbol (format #f "~a-~a" *transpiler-temporal-variable* num))))
 	(set! num (+ num 1))
 	res))))
 
@@ -68,14 +68,14 @@
 	    *cps-conversions*)))))
 
 (define-cps-conversion (lambda args expr) cont
-  (let ((next (gensym)))
+  (let ((next (next-temporary-variable)))
     `(,cont (lambda ,(cons next args)
 	      ,(convert-cps expr next)))))
 
 (define-cps-conversion (set! var expr) cont
   (convert-cps
    expr
-   (let ((x (gensym)))
+   (let ((x (next-temporary-variable)))
      `(lambda (,x) (,cont (set! ,var ,x))))))
 
 (define-cps-conversion (define var) cont
@@ -177,30 +177,6 @@
 (define (=* cont . args)
   (cont (apply * args)))
 
-(print
- (convert-cps
-  '(=+ 1 (=+ 2 (=+ 3 4)))
-  "identity"))
-
-(print
- (convert-cps
-  '(set! square
-	 (lambda ()
-	   (=* n n)))
-  "identity"))
-
-(print
- (convert-cps
-  '(set! double
-	 (lambda (n)
-   (=+ n n)))
-  "identity"))
-
-(print
- (convert-cps
-  '(lambda (x) (=+ x x))
-  "identity"))
-
 
 (define (cps-function f)
   (lambda (cont . args)
@@ -208,20 +184,9 @@
 
 (define =print (cps-function print))
 
-(map
- (lambda (line)
-   (display line)
-   (newline))
- (convert-global-scope
-  '(
-    (define square (lambda (x) (=* x x)))
-    (=print (square 8))
-    )))
 
-
-(define square)
-((lambda (G327) (identity (set! square G327)))
- (lambda (G328 x) (=* G328 x x)))
-(square (lambda (TRANSPILER-TEMPORAL-VARIABLE_26)
-	  (=print identity TRANSPILER-TEMPORAL-VARIABLE_26))
-	8)
+(map (lambda (line)
+       (display line)
+       (newline))
+     (convert-global-scope
+      (read-while-eof)))
