@@ -212,17 +212,6 @@
 	()
 	(cons res (read-while-eof)))))
 
-(define (cps-function f)
-  (lambda (cont . args)
-    (cont (apply f args))))
-
-(define =print (cps-function print))
-(define =+ (cps-function +))
-(define =* (cps-function *))
-(define =- (cps-function -))
-(define =<= (cps-function <=))
-(define == (cps-function =))
-
 (map (lambda (line)
        (write line)
        (newline))
