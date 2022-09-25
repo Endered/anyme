@@ -101,6 +101,9 @@
 (define-scheme-syntax (define var expr)
   `(define ,var ,(simplify expr)))
 
+(define-scheme-syntax (define var)
+  `(define ,var))
+
 (defmacro (define (f . args) . body)
   `(define ,f (lambda ,args ,@body)))
 
