@@ -79,8 +79,8 @@
 	  (transpile then)
 	  (transpile else)))
 
-(define-transpiler-syntax (convert-eval s)
-  s)
+(define-transpiler-syntax (transpiler-ffi s)
+  (format #f "~a" s))
 
 (define-syntax define-binary-operator
   (syntax-rules ()

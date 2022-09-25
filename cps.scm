@@ -104,6 +104,9 @@
 		 (lambda (,next ,val)
 		   (,cont ,val)))))))
 
+(define-cps-conversion (transpiler-ffi x) cont
+  `(transpiler-ffi ,x))
+
 (define (var? expr)
   (symbol? expr))
 
