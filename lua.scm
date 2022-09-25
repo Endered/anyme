@@ -82,6 +82,9 @@
 (define-transpiler-syntax (transpiler-ffi s)
   (format #f "~a" s))
 
+(define-transpiler-syntax (procedure? x)
+  (format #f "(type(~a) == 'function')" (transpile x)))
+
 (define-syntax define-binary-operator
   (syntax-rules ()
     ((_ symbol op)

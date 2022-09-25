@@ -107,6 +107,9 @@
 (define-cps-conversion (transpiler-ffi x) cont
   `(transpiler-ffi ,x))
 
+(define-cps-conversion (procedure? x) cont
+  `(,cont (procedure? ,x)))
+
 (define (var? expr)
   (symbol? expr))
 
