@@ -173,7 +173,7 @@
 					       (x (list x)))
 				 exprs)))
     (append (map (lambda (x) `(define ,x)) global-vars)
-	    (map (lambda (x) (convert-cps x 'identity)) define-removed))))
+	    (map (lambda (x) (convert-cps x '(lambda (x) x))) define-removed))))
 
 (define (fold-exprs exprs)
   (match exprs
