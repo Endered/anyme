@@ -4,7 +4,7 @@
  "
 function myprint(cont,x)
   print(x)
-  return 1
+  return cont(1)
 end
 "
  )
