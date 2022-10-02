@@ -107,6 +107,21 @@
 (define-cps-conversion (transpiler-ffi x) cont
   `(transpiler-ffi ,x))
 
+
+(define-cps-conversion (cps-call . expr) cont
+  (let ((operator-position (index-of operator-call? expr)))
+    (if (null? operator-position)
+	`(,cont ,expr)
+	(let ((tmp-value (next-temporary-variable)))
+	  (convert-cps
+	   (nth operator-position expr)
+	   `(lambda (,tmp-value)
+	      ,(convert-cps `(cps-call
+			      ,@(take expr operator-position)
+			      ,tmp-value
+			      ,@(drop expr (+ 1 operator-position)))
+			    cont)))))))
+
 (define-cps-conversion (procedure? x) cont
   `(,cont (procedure? ,x)))
 
