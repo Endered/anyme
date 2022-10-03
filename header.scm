@@ -24,7 +24,18 @@
 	   (= (x "lisp-type") "lisp-nil")))
     (define (pair? x)
       (and (procedure? x)
-	   (= (x "lisp-type") "lisp-cons")))))
+	   (= (x "lisp-type") "lisp-cons")))
+    (define (length lst)
+      (if (null? lst)
+	  0
+	  (+ 1 (length (cdr lst)))))
+    (define (reverse lst)
+      (define (rec lst acc)
+	(if (null? lst)
+	    acc
+	    (rec (cdr lst) (cons (car lst) acc))))
+      (reverse lst ()))
+    ))
 
 
 (map (lambda (line)
