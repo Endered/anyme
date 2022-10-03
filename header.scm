@@ -34,7 +34,7 @@
 	(if (null? lst)
 	    acc
 	    (rec (cdr lst) (cons (car lst) acc))))
-      (reverse lst ()))
+      (rec lst ()))
     (define (map1 f lst)
       (if (null? lst)
 	  ()
