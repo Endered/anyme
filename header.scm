@@ -35,6 +35,11 @@
 	    acc
 	    (rec (cdr lst) (cons (car lst) acc))))
       (reverse lst ()))
+    (define (map1 f lst)
+      (if (null? lst)
+	  ()
+	  (cons (f (car lst))
+		(map1 f (cdr lst)))))
     ))
 
 
