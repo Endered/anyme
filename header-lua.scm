@@ -7,6 +7,11 @@
 
 (define headers
   '(
+    (transpiler-ffi "
+local array_empty = function(cont)
+    return cont({})
+end
+")
     (define (array-length arr)
       (cps-call table.maxn arr))
     (define (array->list arr)
@@ -15,7 +20,13 @@
 	    acc
 	    (rec (- i 1)
 		 (cons (ref arr i) acc))))
-      (rec (array-length arr) ()))))
+      (rec (array-length arr) ()))
+    (define (list->array lst)
+      (let ((res (array_empty)))
+	(map1 (lambda (x)
+		(cps-call table.insert res x))
+	      lst)
+	res))))
 
 
 (map (lambda (line)
