@@ -85,6 +85,22 @@
 (define-transpiler-syntax (procedure? x)
   (format #f "(type(~a) == 'function')" (transpile x)))
 
+(define-transpiler-syntax (attribute cont x . attributes)
+  (format #f "(~a)(~a.~a)"
+	  (transpile cont)
+	  (transpile x)
+	  (join-string "." (map transpile attributes))))
+
+(define-transpiler-syntax (ref cont x . indexes)
+  (format #f "(~a)(~a~a)"
+	  (transpile cont)
+	  (transpile x)
+	  (join-string
+	   ""
+	   (map (lambda (x)
+		  (format #f "[~a]" (transpile x)))
+		indexes))))
+
 (define-syntax define-binary-operator
   (syntax-rules ()
     ((_ symbol op)
@@ -130,6 +146,8 @@
 	  ((eq? c #\?) "_QUESTION_")
 	  ((eq? c #\*) "_STAR_")
 	  ((eq? c #\=) "_EQUAL_")
+	  ((eq? c #\>) "_LARGER_")
+	  ((eq? c #\<) "_LESS_")
 	  (else (list->string (list c)))))
   (list->string
    (mappend string->list
