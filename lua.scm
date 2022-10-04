@@ -111,9 +111,6 @@
 (define-transpiler-syntax (transpiler-ffi s)
   (format #f "~a" s))
 
-(define-transpiler-syntax (procedure? x)
-  (format #f "(type(~a) == 'function')" (transpile x)))
-
 (define-transpiler-syntax (attribute cont x . attributes)
   (format #f "(~a)(~a.~a)"
 	  (transpile cont)

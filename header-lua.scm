@@ -11,6 +11,9 @@
 local array_empty = function(cont)
     return cont({})
 end
+local is_procedure = function(cont,x)
+    return cont(type(x) == 'function')
+end
 ")
     (define (array-length arr)
       (cps-call table.maxn arr))
@@ -26,7 +29,10 @@ end
 	(map1 (lambda (x)
 		(cps-call table.insert res x))
 	      lst)
-	res))))
+	res))
+    (define (procedure? x)
+      (is_procedure x))
+    ))
 
 
 (map (lambda (line)

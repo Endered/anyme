@@ -122,13 +122,6 @@
 			      ,@(drop expr (+ 1 operator-position)))
 			    cont)))))))
 
-(define-cps-conversion (procedure? x) cont
-  (let ((tmp-value (next-temporary-variable)))
-    (convert-cps
-     x
-     `(lambda (,tmp-value)
-	(,cont (procedure? ,tmp-value))))))
-
 (define (var? expr)
   (symbol? expr))
 
