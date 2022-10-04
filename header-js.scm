@@ -15,7 +15,6 @@ let is_procedure = (cont,x) => {
     return cont(typeof(x) == 'function')
 }
 let array_length = (cont,x) => {
-    console.log(x)
     return cont(x.length)
 }
 let array_push = (cont,x,v) => {
