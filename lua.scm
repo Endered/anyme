@@ -65,10 +65,27 @@
 	  (transpile expr)
 	  (transpile var)))
 
+(define (last-cdr lst)
+  (if (null? lst)
+      ()
+      (cdr (last-pair lst))))
+
+(define (list-cars lst)
+  (reverse (reverse lst)))
+
 (define-transpiler-syntax (lambda args expr)
-  (format #f "function(~a)\n return ~a\nend"
-	  (join-string "," (map convert-symbol args))
-	  (transpile expr)))
+  (let ((cars (list-cars args))
+	(variadic-argument (last-cdr args)))
+    (format #f "function(~a)\n return ~a\nend"
+	    (join-string
+	     ","
+	     (map convert-symbol
+		  (append cars (if (null? variadic-argument) () '(...)))))
+	    (if (null? variadic-argument)
+		(transpile expr)
+		(format #f "(~a)(~a,{...})"
+			(convert-symbol 'array->list)
+			(transpile `(lambda (,variadic-argument) ,expr)))))))
 
 (define-transpiler-syntax (define var)
   (format #f "local ~a" (convert-symbol var)))
