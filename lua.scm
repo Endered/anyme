@@ -87,6 +87,18 @@
 			(convert-symbol 'array->list)
 			(transpile `(lambda (,variadic-argument) ,expr)))))))
 
+(define-transpiler-syntax (apply cont f arg1 . args)
+  (format #f "(~a)(~a,~a)"
+	  (transpile f)
+	  (transpile cont)
+	  (join-string
+	   ","
+	   (append (map convert-symbol (remove-last (cons arg1 args)))
+		   (list
+		    (format #f "~a(unpack,~a)"
+			    (convert-symbol 'list->array)
+			    (convert-symbol (last (cons arg1 args)))))))))
+
 (define-transpiler-syntax (define var)
   (format #f "local ~a" (convert-symbol var)))
 
