@@ -40,6 +40,8 @@
 	  ()
 	  (cons (f (car lst))
 		(map1 f (cdr lst)))))
+    (define (list . list-elements)
+      list-elements)
     ))
 
 
