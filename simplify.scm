@@ -206,8 +206,19 @@
 	()
 	(cons res (read-while-eof)))))
 
+(define (evaluate-macros lines)
+  (map (lambda (line)
+	 (when (eq? (car line) 'defmacro)
+	   (eval line (interaction-environment))))
+       lines))
 
-(map (lambda (line)
-       (write line)
-       (newline))
-     (map simplify (read-while-eof)))
+(define (transpile-programs lines)
+  (map (lambda (line)
+	 (when (not (eq? (car line) 'defmacro))
+	   (write (simplify line))
+	   (newline)))
+       lines))
+
+(let ((program (read-while-eof)))
+  (evaluate-macros program)
+  (transpile-programs program))
