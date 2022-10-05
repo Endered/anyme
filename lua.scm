@@ -79,12 +79,12 @@
     (format #f "function(~a)\n return ~a\nend"
 	    (join-string
 	     ","
-	     (map convert-symbol
+	     (map transpile
 		  (append cars (if (null? variadic-argument) () '(...)))))
 	    (if (null? variadic-argument)
 		(transpile expr)
 		(format #f "(~a)(~a,{...})"
-			(convert-symbol 'array->list)
+			(transpile 'array->list)
 			(transpile `(lambda (,variadic-argument) ,expr)))))))
 
 (define-transpiler-syntax (apply cont f arg1 . args)
@@ -93,11 +93,10 @@
 	  (transpile cont)
 	  (join-string
 	   ","
-	   (append (map convert-symbol (remove-last (cons arg1 args)))
+	   (append (map transpile (remove-last (cons arg1 args)))
 		   (list
-		    (format #f "~a(unpack,~a)"
-			    (convert-symbol 'list->array)
-			    (convert-symbol (last (cons arg1 args)))))))))
+		    (format #f "unpack(~a)"
+			    (transpile (last (cons arg1 args)))))))))
 
 (define-transpiler-syntax (define var)
   (format #f "local ~a" (convert-symbol var)))
