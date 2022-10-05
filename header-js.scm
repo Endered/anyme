@@ -20,6 +20,30 @@ let array_length = (cont,x) => {
 let array_push = (cont,x,v) => {
     return cont(x.push(v))
 }
+
+let lisp_engine = (v) => {
+    while(v(\"lisp-type\") == \"lisp-continuation\"){
+        v = v(\"lisp-continue\")
+    }
+    if(v(\"lisp-type\") != \"lisp-result\")console.log(\"lisp-type is invalid\")
+    return v(\"lisp-get-result\")
+}
+
+let lisp_result = (v) => {
+    return (x) => {
+        if(x == 'lisp-type')return 'lisp-result'
+        if(x == 'lisp-get-result')return v
+        console.log('i dont know that argument')
+    }
+}
+
+let lisp_continuation = (f) => {
+    return (x) => {
+        if(x == 'lisp-type')return 'lisp-continuation'
+        if(x == 'lisp-continue')return f()
+        console.log('i dont know that argument')
+    }
+}
 ")
     (define (array-push x v)
       (array_push x v))

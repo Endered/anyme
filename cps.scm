@@ -56,7 +56,7 @@
 	res))))
 
 (define-syntax define-cps-conversion
-  (syntax-rules ()
+  (syntax-rules (when)
     ((_ (head . args) cont then)
      (set! *cps-conversions*
 	   (cons
@@ -64,6 +64,17 @@
 	      (match expr
 		     (('head . args)
 		      (just then))
+		     (xs (none))))
+	    *cps-conversions*)))
+    ((_ (head . args) cont (when condition) then)
+     (set! *cps-conversions*
+	   (cons
+	    (lambda (expr cont)
+	      (match expr
+		     (('head . args)
+		      (if condition
+			  (just then)
+			  (none)))
 		     (xs (none))))
 	    *cps-conversions*)))))
 
@@ -122,6 +133,15 @@
 			      ,@(drop expr (+ 1 operator-position)))
 			    cont)))))))
 
+(define-cps-conversion (apply f arg1 . args) cont
+  (when (let ((op (index-of operator-call? (list* f arg1 args))))
+	  (null? op)))
+  (let* ((args (cons arg1 args))
+	 (tmp (next-temporary-variable)))
+    `(list->array
+      (lambda (,tmp) (apply ,cont ,f ,@(remove-last args) ,tmp))
+      ,(last args))))
+
 (define (var? expr)
   (symbol? expr))
 
@@ -176,7 +196,10 @@
   (just 
    (let ((operator-position (index-of operator-call? expr)))
      (if (null? operator-position)
-	 `(,(car expr) ,cont ,@(cdr expr))
+	 (let ((tmp (next-temporary-variable)))
+	   `(lisp_continuation
+	     (lambda ()
+	       (,(car expr) ,cont ,@(cdr expr)))))
 	 (let ((tmp-value (next-temporary-variable)))
 	   (convert-cps
 	    (nth operator-position expr)
@@ -196,7 +219,12 @@
 					       (x (list x)))
 				 exprs)))
     (append (map (lambda (x) `(define ,x)) global-vars)
-	    (map (lambda (x) (convert-cps x '(lambda (x) x))) define-removed))))
+	    (map (lambda (x)
+		   (if (eq? (car x) 'transpiler-ffi)
+		       (convert-cps x '())
+		       `(lisp_engine
+			 ,(convert-cps x 'lisp_result))))
+		 define-removed))))
 
 (define (fold-exprs exprs)
   (match exprs
