@@ -7,7 +7,7 @@
 
 (define headers
   '(
-    (transpiler-ffi "
+    (transpiler-ffi-header "
 let array_empty = (cont) => {
     return cont([])
 }

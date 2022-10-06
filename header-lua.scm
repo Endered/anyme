@@ -7,7 +7,7 @@
 
 (define headers
   '(
-    (transpiler-ffi "
+    (transpiler-ffi-header "
 local array_empty = function(cont)
     return cont({})
 end
