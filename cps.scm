@@ -209,6 +209,17 @@
 			       ,@(drop expr (+ 1 operator-position)))
 			     cont))))))))
 
+(define (adjust-headers exprs)
+  (let ((headers
+	 (mappend (match-lambda (('transpiler-ffi-header expr) (list `(transpiler-ffi ,expr)))
+				(_ ()))
+		  exprs))
+	(header-removed
+	 (mappend (match-lambda (('transpiler-ffi-header expr) ())
+				(x (list x)))
+		  exprs)))
+    (append headers header-removed)))
+
 (define (convert-global-scope exprs)
   (let ((global-vars (mappend (match-lambda (('define var expr) (list var))
 					    (('define var) (list var))
@@ -268,5 +279,6 @@
        (write line)
        (newline))
      (convert-global-scope
-      (read-while-eof)))
+      (adjust-headers
+       (read-while-eof))))
 
