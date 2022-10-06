@@ -118,7 +118,6 @@
 (define-cps-conversion (transpiler-ffi x) cont
   `(transpiler-ffi ,x))
 
-
 (define-cps-conversion (cps-call . expr) cont
   (let ((operator-position (index-of operator-call? expr)))
     (if (null? operator-position)
@@ -209,27 +208,21 @@
 			       ,@(drop expr (+ 1 operator-position)))
 			     cont))))))))
 
-(define (adjust-headers exprs)
-  (let ((headers
-	 (mappend (match-lambda (('transpiler-ffi-header expr) (list `(transpiler-ffi ,expr)))
-				(_ ()))
-		  exprs))
-	(header-removed
-	 (mappend (match-lambda (('transpiler-ffi-header expr) ())
-				(x (list x)))
-		  exprs)))
-    (append headers header-removed)))
-
 (define (convert-global-scope exprs)
-  (let ((global-vars (mappend (match-lambda (('define var expr) (list var))
+  (let ((headers (mappend (match-lambda (('transpiler-ffi-header expr) (list `(transpiler-ffi ,expr)))
+					(_ ()))
+		  exprs))
+	(global-vars (mappend (match-lambda (('define var expr) (list var))
 					    (('define var) (list var))
 					    (_ ()))
 			      exprs))
 	(define-removed (mappend (match-lambda (('define var expr) (list `(set! ,var ,expr)))
 					       (('define var) ())
+					       (('transpiler-ffi-header expr) ())
 					       (x (list x)))
 				 exprs)))
-    (append (map (lambda (x) `(define ,x)) global-vars)
+    (append headers
+	    (map (lambda (x) `(define ,x)) global-vars)
 	    (map (lambda (x)
 		   (if (eq? (car x) 'transpiler-ffi)
 		       (convert-cps x '())
@@ -279,6 +272,5 @@
        (write line)
        (newline))
      (convert-global-scope
-      (adjust-headers
-       (read-while-eof))))
+      (read-while-eof)))
 
