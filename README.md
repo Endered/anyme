@@ -4,10 +4,16 @@ this is transpiler for scheme(currently no full futured) to *any* language(excep
 ## Usage
 
 ```bash
-cat "any scheme file" | gosh simplify.scm | gosh cps.scm | gosh lua.scm # output is lua program
+cat "any scheme file" | gosh header.scm | gosh header-lua.scm | gosh simplify.scm | gosh cps.scm | gosh lua.scm # output is lua program
 ```
 
 ## etc
+
+### header-lua.scm
+This is utility about lua language. There definition is required to define transpiler.
+
+### header.scm
+This is definition about scheme function
 
 ### simplify.scm
 This simplify scheme program likely below.
@@ -47,4 +53,11 @@ end
  
 ;; And you can call that
 (myprint (mysin 1.57))
+
+
+OR
+
+
+(cps-call print (cps-call math.sin 1.57))
+
 ```
