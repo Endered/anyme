@@ -4,7 +4,7 @@ this is transpiler for scheme(currently no full futured) to *any* language(excep
 ## Usage
 
 ```bash
-cat "any scheme file" | gosh header.scm | gosh header-lua.scm | gosh simplify.scm | gosh cps.scm | gosh lua.scm # output is lua program
+cat "any scheme file" | bash transpile.sh lua # output is lua program
 ```
 
 ## etc
