@@ -116,6 +116,9 @@
 (define-scheme-syntax (if condition then else)
   `(if ,(simplify condition) ,(simplify then) ,(simplify else)))
 
+(define-scheme-syntax (if condition then)
+  `(if ,(simplify condition) ,(simplify then) ()))
+
 (defmacro (cond (condition . then) . other)
   `(if ,condition (begin ,@then) (cond ,@other)))
 
