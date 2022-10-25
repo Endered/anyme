@@ -110,9 +110,6 @@
 (define-scheme-syntax (aref var . indexes)
   `(aref (simplify ,var) ,@(map simplify indexes)))
 
-(define-scheme-syntax (make-table . binds)
-  `(make-table ,@(map (lambda (x) (cons (car x) (simplify (cdr x)))) binds)))
-
 (define-scheme-syntax (if condition then else)
   `(if ,(simplify condition) ,(simplify then) ,(simplify else)))
 
