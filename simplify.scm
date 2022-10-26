@@ -90,10 +90,7 @@
   `(set! ,(simplify var) ,(simplify expr)))
 
 (defmacro (begin . body)
-  `(let () ,@body))
-
-(defmacro (let variables . body)
-  `((lambda ,(map car variables) ,@body) ,@(map cadr variables)))
+  `((lambda () ,@body)))
 
 (define-scheme-syntax (lambda args . expr)
   `(lambda ,args ,@(map simplify expr)))
@@ -104,51 +101,8 @@
 (define-scheme-syntax (define var)
   `(define ,var))
 
-(defmacro (define (f . args) . body)
-  `(define ,f (lambda ,args ,@body)))
-
-(define-scheme-syntax (aref var . indexes)
-  `(aref (simplify ,var) ,@(map simplify indexes)))
-
 (define-scheme-syntax (if condition then else)
   `(if ,(simplify condition) ,(simplify then) ,(simplify else)))
-
-(define-scheme-syntax (if condition then)
-  `(if ,(simplify condition) ,(simplify then) ()))
-
-(defmacro (cond (condition . then) . other)
-  `(if ,condition (begin ,@then) (cond ,@other)))
-
-(defmacro (or x . other)
-  (let ((tmp (gensym)))
-    `(let ((,tmp ,x))
-       (if ,tmp ,tmp (or ,@other)))))
-
-(defmacro (or x)
-  x)
-
-(defmacro (or)
-  #f)
-
-(defmacro (and x . other)
-  (let ((tmp (gensym)))
-    `(let ((,tmp ,x))
-       (if ,tmp (and ,@other) #f))))
-
-(defmacro (and x)
-  x)
-
-(defmacro (and)
-  #t)
-
-(define-scheme-syntax (cond)
-  `(error "lisp cond error: failed all conditions"))
-
-(defmacro (cond ('else . then))
-  `(begin ,@then))
-
-(defmacro (not x)
-  `(if ,x #f #t))
 
 (define-scheme-syntax (transpiler-eval code)
   code)
@@ -206,12 +160,6 @@
 	()
 	(cons res (read-while-eof)))))
 
-(define (evaluate-macros lines)
-  (map (lambda (line)
-	 (when (eq? (car line) 'defmacro)
-	   (eval line (interaction-environment))))
-       lines))
-
 (define (transpile-programs lines)
   (map (lambda (line)
 	 (when (not (eq? (car line) 'defmacro))
@@ -219,6 +167,11 @@
 	   (newline)))
        lines))
 
+(define (flatten-begins programs)
+  (mappend (match-lambda (('begin . body)
+			  (flatten-begins body))
+			 (x (list x)))
+	   programs))
+
 (let ((program (read-while-eof)))
-  (evaluate-macros program)
-  (transpile-programs program))
+  (transpile-programs (flatten-begins program)))
