@@ -107,7 +107,7 @@
   (format #f "let ~a" (convert-symbol var)))
 
 (define-transpiler-syntax (if condition then else)
-  (format #f "(() =>  {if(~a){\nreturn ~a\n}else{\nreturn ~a\n}\n})()"
+  (format #f "(() =>  {if(~a != false){\nreturn ~a\n}else{\nreturn ~a\n}\n})()"
 	  (transpile condition)
 	  (transpile then)
 	  (transpile else)))

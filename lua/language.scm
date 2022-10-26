@@ -102,7 +102,7 @@
   (format #f "local ~a" (convert-symbol var)))
 
 (define-transpiler-syntax (if condition then else)
-  (format #f "(function() if ~a then \nreturn ~a\nelse\nreturn ~a\nend\nend)()"
+  (format #f "(function() if ~a ~= false then \nreturn ~a\nelse\nreturn ~a\nend\nend)()"
 	  (transpile condition)
 	  (transpile then)
 	  (transpile else)))
