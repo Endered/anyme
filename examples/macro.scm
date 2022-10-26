@@ -21,8 +21,12 @@
 	     #f)))))
 
 (defmacro (match1 x symbol . then)
-  `(let ((,symbol ,x))
-     (cons (begin ,@then) ())))
+  (if (symbol? symbol)
+      `(let ((,symbol ,x))
+	 (cons (begin ,@then) ()))
+      `(if (= ,symbol ,x)
+	   (cons (begin ,@then))
+	   #f)))
 
 (defmacro (match1 x () . then)
   (let ((evaled (gensym)))
@@ -63,13 +67,13 @@
      (cons (begin ,@then) ())))
 
 (defmacro (pattern-match1 x (struct-name . elements) . then)
-  (let ((binds (map (lambda (x) (if (symbol? x) x (gensym))) elements))
+  (let ((binds (map (lambda (x) (if (pair? x) (gensym) x)) elements))
 	(struct-name/ (string->symbol (format #f "~a-" struct-name)))
 	(result (gensym)))
     (define (rec binds elements)
       (cond ((null? elements)
 	     `(begin ,@then))
-	    ((symbol? (car elements))
+	    ((not (pair? (car elements)))
 	     (rec (cdr binds) (cdr elements)))
 	    (else
 	     (let ((result (gensym)))
@@ -96,3 +100,10 @@
 		((Cons x (Cons y (Nil))) (+ x y))
 		((Cons x (Nil)) x)
 		((Nil) 0)))
+
+(define-struct Pair x y)
+
+(myprint
+ (pattern-match (Cons 3 (Cons 2 (Nil)))
+		((Cons x (Cons 2 (Nil))) (+ x 1))
+		((Cons x (Cons y (Nil))) (* x y))))
